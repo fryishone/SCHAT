@@ -1,0 +1,91 @@
+s-chat solution
+
+In order of thread execution from running the program:
+
+mainp obtains input from the command line, checks validity,
+creates socket and 5 threads.  Also passes socket as void param to
+both the send and receive threads
+
+check valid input
+
+globals=cmdline args
+new socket
+create server_thread()
+create send_thread(void socket)
+create receive_thread(void socket)
+create output_thread()
+create input_thread()
+
+end
+
+server_thread intializes locals, creates incomming and outgoing lists
+then loops waiting for messages from the other threads, performs different
+actions depending on msg type
+
+new struct threadMessage serverTM localTM
+new LIST outgoing, incomming
+
+while (true)
+  receive_message
+    switch (msgtype)
+
+	case(network receive)
+	  if (listcount(incomming) = 0)
+	    insert at head of incomming list
+	    reply to networkreceive thread
+	  else
+	    prepend msg to incomming list
+
+	case(keyboard)
+	  if (listcount = 0)
+	    insert at head of outgoing list
+	    reply to keyboardthread
+	  else 
+	    prepend msg to outgoing list
+	  break;
+	
+	case(output)
+	  if (listcount(incomming) > 0)
+	    reply msg
+	  else
+	    reply \0
+  
+	case(network send)
+	  if (listcount(outgoing) > 0)
+	    reply msg
+	  else
+	    reply \0
+
+end
+
+network send thread intiallizes local variables and pings server_thread
+waiting for a message to send
+
+new struct serveraddr outgoing_msg
+
+while (true)
+
+  send(server_thread)
+    if msg != \0 
+      send msg(network)
+    
+network receive thread intiallizes local variables and listens on the socket,
+when packet arrives send it to server thread.
+
+new struct serveraddr incomming_msg
+
+while (true)
+    recvfrom network
+      send msg(server_thread)
+
+input thread waits for input from keyboard and sends it to the server thread
+
+while (true)
+    read 
+      send msg(server_thread)
+
+output thread waits for msg from server thread and writes to stdout
+    
+while(true)
+    send msg(server_thread)
+      write
